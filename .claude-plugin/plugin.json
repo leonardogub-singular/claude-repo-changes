@@ -1,6 +1,6 @@
 {
   "name": "repo-changes",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "description": "Pane with git changes and diffs for every repo (and .claude/worktrees) inside a folder that is not a git repo",
   "author": { "name": "Leonardo Gubert" },
   "repository": "https://github.com/leonardogub-singular/claude-repo-changes",

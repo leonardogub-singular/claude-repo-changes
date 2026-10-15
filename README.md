@@ -47,7 +47,7 @@ The mod looks at the folder the session started in. A `cd` in the shell does not
 
 - The colors are made for a dark theme. In a light theme the pane looks wrong.
 - The pane uses the app's font and text size. A mod cannot change them.
-- A repo shows at most 80 rows. Use the filter to find the rest.
+- A repo shows 100 rows at first. A "Show 100 more" button under the list shows the next 100.
 - Diffs are against `HEAD`. Committed work on a branch does not show.
 
 ## Develop

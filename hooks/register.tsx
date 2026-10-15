@@ -21,7 +21,7 @@ import {
 const PANE = 'repo-changes'
 const TITLE = 'Repo changes'
 const POLL_MS = 30_000
-const MAX_ROWS_PER_REPO = 80
+const ROWS_PAGE = 100
 const INDENT = 2
 const AUTO_OPEN_MAX_REPOS = 2
 const EDIT_TOOLS = new Set(['Edit', 'Write', 'NotebookEdit', 'Bash', 'MultiEdit'])
@@ -37,6 +37,7 @@ const TRACKED_ONLY = { plugin: 'repo-changes', key: 'isTrackedOnly' } as const
 const LAST_VIEWED = { plugin: 'repo-changes', key: 'lastViewed' } as const
 const IS_FLAT = { plugin: 'repo-changes', key: 'isFlat' } as const
 const STORE_IS_FLAT = 'isFlat'
+const ROW_LIMITS = { plugin: 'repo-changes', key: 'rowLimits' } as const
 
 type Target = { path: string; label: string }
 
@@ -160,6 +161,11 @@ async function toggleFlat($: EngineInterface) {
   await $.store.set(STORE_IS_FLAT, !isFlat)
 }
 
+async function showMore($: EngineInterface, repoPath: string) {
+  const { value: limits = {} } = await $.state.get(ROW_LIMITS)
+  await $.state.set(ROW_LIMITS, { ...limits, [repoPath]: (limits[repoPath] ?? ROWS_PAGE) + ROWS_PAGE })
+}
+
 function plural(n: number, one: string, many: string) {
   return `${n} ${n === 1 ? one : many}`
 }
@@ -213,6 +219,7 @@ export const register: Register = on => {
     const { value: isTrackedOnly = false } = await $.state.get(TRACKED_ONLY)
     const { value: lastViewed = null } = await $.state.get(LAST_VIEWED)
     const { value: isFlat = false } = await $.state.get(IS_FLAT)
+    const { value: rowLimits = {} } = await $.state.get(ROW_LIMITS)
 
     const time = at ? new Date(at).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' }) : '…'
     const isFiltering = filter.trim() !== ''
@@ -237,7 +244,8 @@ export const register: Register = on => {
           : openGroupList.filter(k => k.startsWith(`${repo.path}::`)).map(k => k.slice(repo.path.length + 2)),
       )
       const rows = !isOpen ? [] : isFlat ? flatRows(repo.files) : buildRows(repo.files, openGroups)
-      const shown = rows.slice(0, MAX_ROWS_PER_REPO)
+      const shown = rows.slice(0, rowLimits[repo.path] ?? ROWS_PAGE)
+      const hidden = rows.length - shown.length
 
       return (
         <Box key={repo.path} flexDirection="column">
@@ -347,9 +355,15 @@ export const register: Register = on => {
               </Box>
             )
           })}
-          {rows.length > shown.length && (
-            <Box paddingLeft={pad}>
-              <Text color={COLORS.faint}>+{rows.length - shown.length} more rows (use the filter)</Text>
+          {hidden > 0 && (
+            <Box paddingLeft={pad} flexDirection="row" gap={1}>
+              <Button
+                key={`more:${repo.path}`}
+                plain
+                label={`Show ${Math.min(hidden, ROWS_PAGE)} more`}
+                onPress={() => void showMore($, repo.path)}
+              />
+              <Text color={COLORS.faint}>of {hidden} hidden</Text>
             </Box>
           )}
         </Box>

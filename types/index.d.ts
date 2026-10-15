@@ -25,6 +25,7 @@ declare module 'claude-code' {
       isTrackedOnly: boolean
       lastViewed: string | null
       isFlat: boolean
+      rowLimits: Record<string, number>
     }
   }
 }
