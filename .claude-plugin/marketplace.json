@@ -1,0 +1,11 @@
+{
+  "name": "claude-repo-changes",
+  "owner": { "name": "Leonardo Gubert" },
+  "plugins": [
+    {
+      "name": "repo-changes",
+      "source": "./",
+      "description": "Pane with git changes and diffs for every repo (and .claude/worktrees) inside a folder that is not a git repo"
+    }
+  ]
+}
